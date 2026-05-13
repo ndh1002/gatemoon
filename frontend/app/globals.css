@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: radial-gradient(1200px 600px at 20% -10%, rgba(245, 158, 11, 0.08), transparent),
+    radial-gradient(900px 500px at 100% 0%, rgba(34, 211, 238, 0.06), transparent), #0b0e11;
+}
+
+.glass {
+  @apply border border-tv-border/80 bg-tv-panel/70 shadow-glow backdrop-blur-md;
+}
