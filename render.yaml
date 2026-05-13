@@ -1,0 +1,15 @@
+</> YAML
+services:
+  - type: web
+    name: gatemoon-backend
+    env: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    autoDeploy: true
+
+  - type: web
+    name: gatemoon-frontend
+    env: docker
+    plan: free
+    dockerfilePath: ./frontend/Dockerfile
+    autoDeploy: true
