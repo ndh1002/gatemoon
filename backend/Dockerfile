@@ -10,9 +10,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app ./app
-COPY scripts ./scripts
-COPY models ./models
+COPY backend/app ./app
+COPY backend/scripts ./scripts
+COPY backend/models ./models
 RUN python scripts/train_xgb.py
 
 ENV PYTHONUNBUFFERED=1
