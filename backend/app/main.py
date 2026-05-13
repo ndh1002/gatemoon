@@ -15,6 +15,9 @@ from app.db.session import get_engine
 from app.services.hub import MarketHub
 from app.services.scanner import run_scanner
 from app.ws.market import router as ws_router
+from fastapi import FastAPI
+from app.services.gate_ws import tracked
+from app.ai.moonshot_ai import calculate_score
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("moonhunter")
@@ -66,6 +69,29 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router)
     app.include_router(ws_router)
+    @app.get("/api/moonshots")
+async def moonshots():
+    result = []
+
+    for symbol, coin in tracked.items():
+        try:
+            score = calculate_score(coin)
+
+            result.append({
+                "symbol": symbol,
+                "price": coin.get("last"),
+                "volume": coin.get("volume"),
+                "change": coin.get("change"),
+                "score": score
+            })
+
+        except Exception:
+            pass
+
+    result = sorted(result, key=lambda x: x["score"], reverse=True)
+
+    return result[:50]
+    
     return app
 
 
