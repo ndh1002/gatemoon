@@ -80,6 +80,8 @@ def create_app():
     @app.get("/api/moonshots")
     async def moonshots():
 
+        print("MOONSHOT TRACKED:", gate_ws.tracked)
+
         result = []
 
         for symbol, coin in gate_ws.tracked.items():
