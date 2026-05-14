@@ -87,16 +87,16 @@ async def debug():
 @app.get("/api/moonshots")
 async def moonshots():
 
-    data = []
+    result = []
 
     for symbol, coin in tracked.items():
 
-        data.append({
+        result.append({
             "symbol": symbol,
-            "price": coin.get("last"),
-            "volume": coin.get("volume"),
-            "change": coin.get("change"),
+            "price": float(coin.get("last", 0)),
+            "volume": float(coin.get("volume", 0)),
+            "change": float(coin.get("change", 0)),
             "score": 50
         })
 
-    return data
+    return result
