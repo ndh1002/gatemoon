@@ -19,6 +19,14 @@ from fastapi import FastAPI
 import app.services.gate_ws as gate_ws
 from app.ai.moonshot_ai import calculate_score
 
+BAD_COINS = [
+    "PEPE",
+    "SHIB",
+    "FLOKI",
+    "DOGE",
+    "BONK"
+]
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("moonhunter")
 
@@ -86,11 +94,31 @@ def create_app():
 
         for symbol, coin in gate_ws.tracked.items():
 
+            base_symbol = symbol.split("_")[0]
+
+            if base_symbol in BAD_COINS:
+                continue
+
+            volume = float(coin.get("volume", 0))
+
             score = calculate_score(coin)
             volume = float(coin.get("volume", 0))
 
             if volume < 100000:
                 continue
+
+            score = 50
+
+            change = float(coin.get("change", 0))
+
+            if volume > 10_000_000:
+                score += 10
+
+            if change > 5:
+                score += 20
+
+            if change > 10:
+                score += 20
 
             result.append({
                 "symbol": symbol,
