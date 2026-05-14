@@ -72,6 +72,13 @@ def create_app() -> FastAPI:
     app.include_router(api_router)
     app.include_router(ws_router)
     @app.get("/api/moonshots")
+    @app.get("/api/debug")
+    async def debug():
+
+        return {
+            "tracked_count": len(tracked),
+            "tracked": tracked
+        }
     async def moonshots():
 
         result = []
