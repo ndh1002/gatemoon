@@ -71,7 +71,7 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router)
     app.include_router(ws_router)
-    @app.get("/api/moonshots")
+    
     @app.get("/api/debug")
     async def debug():
 
@@ -79,39 +79,24 @@ def create_app() -> FastAPI:
             "tracked_count": len(tracked),
             "tracked": tracked
         }
+
+        
+    @app.get("/api/moonshots")
     async def moonshots():
 
-        result = []
+        data = []
 
         for symbol, coin in tracked.items():
 
-            try:
+            data.append({
+                "symbol": symbol,
+                "price": coin.get("last"),
+                "volume": coin.get("volume"),
+                "change": coin.get("change"),
+                "score": 50
+            })
 
-                score = 50
-
-                try:
-                    score = calculate_score(coin)
-                except Exception as e:
-                    print("SCORE ERROR:", e)
-
-                result.append({
-                    "symbol": symbol,
-                    "price": coin.get("last"),
-                    "volume": coin.get("volume"),
-                    "change": coin.get("change"),
-                    "score": score
-                })
-
-            except Exception as e:
-                print("MOONSHOT ERROR:", e)
-
-        result = sorted(
-            result,
-            key=lambda x: x["score"],
-            reverse=True
-        )
-
-        return result[:50]
+        return data
     
     return app
 
