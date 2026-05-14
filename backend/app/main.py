@@ -86,13 +86,22 @@ def create_app():
 
         for symbol, coin in gate_ws.tracked.items():
 
+            score = calculate_score(coin)
+
+                volume = float(coin.get("volume", 0))
+
+                if volume < 100000:
+                    continue
+
             result.append({
                 "symbol": symbol,
                 "price": float(coin.get("last", 0)),
                 "volume": float(coin.get("volume", 0)),
                 "change": float(coin.get("change", 0)),
-                "score": 50
+                "score": score
             })
+
+        result = sorted(result, key=lambda x: x["score"], reverse=True)
 
         return result
 

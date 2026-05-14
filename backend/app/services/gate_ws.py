@@ -23,7 +23,14 @@ async def gate_loop():
                     "time": 0,
                     "channel": "spot.tickers",
                     "event": "subscribe",
-                    "payload": ["BTC_USDT"]
+                    "payload": [
+                        "BTC_USDT",
+                        "ETH_USDT",
+                        "SOL_USDT",
+                        "DOGE_USDT",
+                        "PEPE_USDT",
+                        "XRP_USDT"
+                    ]
                 }
 
                 await ws.send(json.dumps(payload))
