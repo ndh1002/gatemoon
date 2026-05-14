@@ -65,7 +65,7 @@ async def top_moonshots(request: Request, limit: int = 40) -> list[dict[str, Any
     return rows[:limit]
 
 
-@router.get("/moonshots")
+@router.get("/moonshots_test")
 async def moonshots(
     request: Request,
     limit: int = 40,
