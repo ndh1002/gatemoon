@@ -87,8 +87,7 @@ def create_app():
         for symbol, coin in gate_ws.tracked.items():
 
             score = calculate_score(coin)
-
-                volume = float(coin.get("volume", 0))
+            volume = float(coin.get("volume", 0))
 
                 if volume < 100000:
                     continue
