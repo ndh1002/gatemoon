@@ -80,16 +80,23 @@ def create_app() -> FastAPI:
 
             try:
 
+                score = 50
+
+                try:
+                    score = calculate_score(coin)
+                except Exception as e:
+                    print("SCORE ERROR:", e)
+
                 result.append({
                     "symbol": symbol,
                     "price": coin.get("last"),
                     "volume": coin.get("volume"),
                     "change": coin.get("change"),
-                    "score": calculate_score(coin)
+                    "score": score
                 })
 
             except Exception as e:
-                print("Moonshot error:", e)
+                print("MOONSHOT ERROR:", e)
 
         result = sorted(
             result,
@@ -97,7 +104,7 @@ def create_app() -> FastAPI:
             reverse=True
         )
 
-        return result[:50]     
+        return result[:50]
     
     return app
 
