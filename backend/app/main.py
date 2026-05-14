@@ -89,8 +89,8 @@ def create_app():
             score = calculate_score(coin)
             volume = float(coin.get("volume", 0))
 
-                if volume < 100000:
-                    continue
+            if volume < 100000:
+                continue
 
             result.append({
                 "symbol": symbol,
