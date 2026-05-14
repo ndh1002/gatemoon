@@ -56,25 +56,19 @@ async def lifespan(app: FastAPI):
         await redis_client.aclose()
 
 
-def create_app() -> FastAPI:
+def create_app():
 
     settings = get_settings()
 
-    app = FastAPI(title="Gate MoonHunter AI", version="1.0.0", lifespan=lifespan)
-
-    origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins or ["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+    app = FastAPI(
+        title="Gate MoonHunter AI",
+        version="1.0.0",
+        lifespan=lifespan
     )
 
     app.include_router(api_router)
     app.include_router(ws_router)
-    
-    
+
     return app
 
 
@@ -86,10 +80,10 @@ async def debug():
 
     return {
         "tracked_count": len(tracked),
-         "tracked": tracked
+        "tracked": tracked
     }
 
-        
+
 @app.get("/api/moonshots")
 async def moonshots():
 
@@ -105,4 +99,4 @@ async def moonshots():
             "score": 50
         })
 
-    return data    
+    return data
