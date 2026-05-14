@@ -16,7 +16,7 @@ from app.services.hub import MarketHub
 from app.services.scanner import run_scanner
 from app.ws.market import router as ws_router
 from fastapi import FastAPI
-from app.services.gate_ws import tracked, gate_loop
+import app.services.gate_ws as gate_ws
 from app.ai.moonshot_ai import calculate_score
 
 logging.basicConfig(level=logging.INFO)
@@ -43,7 +43,7 @@ async def lifespan(app: FastAPI):
         redis_client = None
 
     scan_task = asyncio.create_task(run_scanner(hub, redis_client))
-    gate_task = asyncio.create_task(gate_loop())
+    gate_task = asyncio.create_task(gate_ws.gate_loop())
     logger.info("Scanner task started")
     yield
     scan_task.cancel()
@@ -73,8 +73,8 @@ def create_app():
     async def debug():
 
         return {
-            "tracked_count": len(tracked),
-            "tracked": tracked
+            "tracked_count": len(gate_ws.tracked),
+            "tracked": gate_ws.tracked
         }
 
     @app.get("/api/moonshots")
@@ -82,17 +82,17 @@ def create_app():
 
         result = []
 
-        for symbol, coin in tracked.items():
+        for symbol, coin in gate_ws.tracked.items():
 
             result.append({
                 "symbol": symbol,
                 "price": float(coin.get("last", 0)),
                 "volume": float(coin.get("volume", 0)),
                 "change": float(coin.get("change", 0)),
-                "score": 999999
+                "score": 50
             })
 
-        return [{"hello": "new_version"}]
+        return result
 
     return app
 
