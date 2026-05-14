@@ -16,7 +16,7 @@ from app.services.hub import MarketHub
 from app.services.scanner import run_scanner
 from app.ws.market import router as ws_router
 from fastapi import FastAPI
-from app.services.gate_ws import tracked
+from app.services.gate_ws import tracked, gate_loop
 from app.ai.moonshot_ai import calculate_score
 
 logging.basicConfig(level=logging.INFO)
@@ -43,9 +43,11 @@ async def lifespan(app: FastAPI):
         redis_client = None
 
     scan_task = asyncio.create_task(run_scanner(hub, redis_client))
+    gate_task = asyncio.create_task(gate_loop())
     logger.info("Scanner task started")
     yield
     scan_task.cancel()
+    gate_task.cancel()
     try:
         await scan_task
     except asyncio.CancelledError:

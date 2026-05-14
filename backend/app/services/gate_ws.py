@@ -6,36 +6,39 @@ GATE_WS = "wss://api.gateio.ws/ws/v4/"
 
 tracked = {}
 
-async def subscribe():
-    async with websockets.connect(GATE_WS) as ws:
-        payload = {
-            "time": 0,
-            "channel": "spot.tickers",
-            "event": "subscribe",
-            "payload": ["ALL"]
-        }
+async def gate_loop():
+    while True:
+        try:
+            async with websockets.connect(GATE_WS) as ws:
 
-        await ws.send(json.dumps(payload))
+                payload = {
+                    "time": 0,
+                    "channel": "spot.tickers",
+                    "event": "subscribe",
+                    "payload": ["ALL"]
+                }
 
-        while True:
-            msg = await ws.recv()
+                await ws.send(json.dumps(payload))
 
-            try:
-                data = json.loads(msg)
+                while True:
+                    msg = await ws.recv()
 
-                if "result" in data:
-                    result = data["result"]
+                    data = json.loads(msg)
 
-                    if isinstance(result, dict):
-                        symbol = result.get("currency_pair")
+                    if "result" in data:
+                        result = data["result"]
 
-                        tracked[symbol] = {
-                            "last": result.get("last"),
-                            "volume": result.get("base_volume"),
-                            "change": result.get("change_percentage"),
-                        }
+                        if isinstance(result, dict):
 
-            except Exception as e:
-                print(e)
+                            symbol = result.get("currency_pair")
 
-asyncio.create_task(subscribe())
+                            tracked[symbol] = {
+                                "last": result.get("last"),
+                                "volume": result.get("base_volume"),
+                                "change": result.get("change_percentage"),
+                            }
+
+        except Exception as e:
+            print("Gate WS error:", e)
+
+            await asyncio.sleep(5)
