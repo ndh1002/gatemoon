@@ -7,43 +7,57 @@ GATE_WS = "wss://api.gateio.ws/ws/v4/"
 tracked = {}
 
 async def gate_loop():
+
+    print("STARTING GATE LOOP")
+
     while True:
+
         try:
+            print("CONNECTING TO GATE")
+
             async with websockets.connect(GATE_WS) as ws:
+
+                print("CONNECTED!")
 
                 payload = {
                     "time": 0,
                     "channel": "spot.tickers",
                     "event": "subscribe",
-                    "payload": ["ALL"]
+                    "payload": ["BTC_USDT"]
                 }
 
                 await ws.send(json.dumps(payload))
 
-                print("Connected to Gate.io websocket")
+                print("SUBSCRIBED")
 
                 while True:
+
                     msg = await ws.recv()
+
+                    print("RAW MESSAGE:", msg)
 
                     data = json.loads(msg)
 
                     if data.get("event") == "update":
 
-                        results = data.get("result", [])
+                        result = data.get("result")
 
-                        for result in results:
+                        print("UPDATE:", result)
+
+                        if isinstance(result, dict):
 
                             symbol = result.get("currency_pair")
 
-                            if symbol:
+                            tracked[symbol] = {
+                                "last": result.get("last"),
+                                "volume": result.get("base_volume"),
+                                "change": result.get("change_percentage"),
+                            }
 
-                                tracked[symbol] = {
-                                    "last": result.get("last"),
-                                    "volume": result.get("base_volume"),
-                                    "change": result.get("change_percentage"),
-                                }
+                            print("TRACKED:", tracked)
 
         except Exception as e:
-            print("Gate WS error:", e)
+
+            print("WS ERROR:", str(e))
 
             await asyncio.sleep(5)
