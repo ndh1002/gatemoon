@@ -4,7 +4,13 @@ import websockets
 
 GATE_WS = "wss://api.gateio.ws/ws/v4/"
 
-tracked = {}
+tracked = {
+    "BTC_USDT": {
+        "last": 79000,
+        "volume": 999999,
+        "change": 5.2
+    }
+}
 
 async def gate_loop():
 
