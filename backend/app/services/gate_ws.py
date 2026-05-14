@@ -20,23 +20,28 @@ async def gate_loop():
 
                 await ws.send(json.dumps(payload))
 
+                print("Connected to Gate.io websocket")
+
                 while True:
                     msg = await ws.recv()
 
                     data = json.loads(msg)
 
-                    if "result" in data:
-                        result = data["result"]
+                    if data.get("event") == "update":
 
-                        if isinstance(result, dict):
+                        results = data.get("result", [])
+
+                        for result in results:
 
                             symbol = result.get("currency_pair")
 
-                            tracked[symbol] = {
-                                "last": result.get("last"),
-                                "volume": result.get("base_volume"),
-                                "change": result.get("change_percentage"),
-                            }
+                            if symbol:
+
+                                tracked[symbol] = {
+                                    "last": result.get("last"),
+                                    "volume": result.get("base_volume"),
+                                    "change": result.get("change_percentage"),
+                                }
 
         except Exception as e:
             print("Gate WS error:", e)
