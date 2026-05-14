@@ -69,34 +69,32 @@ def create_app():
     app.include_router(api_router)
     app.include_router(ws_router)
 
+    @app.get("/api/debug")
+    async def debug():
+
+        return {
+            "tracked_count": len(tracked),
+            "tracked": tracked
+        }
+
+    @app.get("/api/moonshots")
+    async def moonshots():
+
+        result = []
+
+        for symbol, coin in tracked.items():
+
+            result.append({
+                "symbol": symbol,
+                "price": float(coin.get("last", 0)),
+                "volume": float(coin.get("volume", 0)),
+                "change": float(coin.get("change", 0)),
+                "score": 50
+            })
+
+        return result
+
     return app
 
 
 app = create_app()
-
-
-@app.get("/api/debug")
-async def debug():
-
-    return {
-        "tracked_count": len(tracked),
-        "tracked": tracked
-    }
-
-
-@app.get("/api/moonshots")
-async def moonshots():
-
-    result = []
-
-    for symbol, coin in tracked.items():
-
-        result.append({
-            "symbol": symbol,
-            "price": float(coin.get("last", 0)),
-            "volume": float(coin.get("volume", 0)),
-            "change": float(coin.get("change", 0)),
-            "score": 50
-        })
-
-    return result
