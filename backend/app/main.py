@@ -89,10 +89,10 @@ def create_app():
                 "price": float(coin.get("last", 0)),
                 "volume": float(coin.get("volume", 0)),
                 "change": float(coin.get("change", 0)),
-                "score": 50
+                "score": 999999
             })
 
-        return result
+        return [{"hello": "new_version"}]
 
     return app
 
