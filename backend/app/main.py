@@ -77,24 +77,15 @@ def create_app():
             "tracked": gate_ws.tracked
         }
 
-    @app.get("/api/moonshots")
+    @app.get("/api/testmoon")
     async def moonshots():
 
-        print("MOONSHOT TRACKED:", gate_ws.tracked)
+        print("TESTMOON HIT")
 
-        result = []
-
-        for symbol, coin in gate_ws.tracked.items():
-
-            result.append({
-                "symbol": symbol,
-                "price": float(coin.get("last", 0)),
-                "volume": float(coin.get("volume", 0)),
-                "change": float(coin.get("change", 0)),
-                "score": 50
-            })
-
-        return result
+        return {
+            "ok": True,
+            "tracked": gate_ws.tracked
+        }
 
     return app
 
