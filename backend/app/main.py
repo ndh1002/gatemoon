@@ -191,7 +191,7 @@ def create_app():
                 "volume": volume,
                 "change": change,
                 "score": score,
-                "volume_spike": volume_spike
+                "volume_spike": volume_spike,
             })
 
         result = sorted(result, key=lambda x: x["score"], reverse=True)
