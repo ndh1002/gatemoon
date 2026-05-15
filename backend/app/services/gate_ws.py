@@ -65,7 +65,7 @@ async def gate_loop():
                         # chỉ giữ 20 mẫu gần nhất
                         volume_history[symbol] = volume_history[symbol][-20:]
 
-                            print("TRACKED:", tracked)
+                        print("TRACKED:", tracked)
 
         except Exception as e:
 
