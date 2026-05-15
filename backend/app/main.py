@@ -73,6 +73,26 @@ async def lifespan(app: FastAPI):
     if redis_client is not None:
         await redis_client.aclose()
 
+def calculate_smart_money(volume_spike, breakout, change):
+
+    score = 0
+
+    # volume đột biến
+    if volume_spike > 2:
+        score += 30
+
+    if volume_spike > 5:
+        score += 30
+
+    # breakout
+    if breakout > 95:
+        score += 20
+
+    # momentum bắt đầu
+    if 2 < change < 12:
+        score += 20
+
+    return min(score, 100)
 
 def calculate_volume_spike(symbol, current_volume):
 
@@ -199,6 +219,12 @@ def create_app():
             score = calculate_score(coin, volume_spike)
             breakout = calculate_breakout(symbol, price)
 
+            smart_money = calculate_smart_money(
+                volume_spike,
+                breakout,
+                change
+            )
+
             result.append({
                 "symbol": symbol,
                 "price": price,
@@ -206,10 +232,19 @@ def create_app():
                 "change": change,
                 "score": score,
                 "volume_spike": volume_spike,
-                "breakout": breakout
+                "breakout": breakout,
+                "smart_money": smart_money
             })
 
-        result = sorted(result, key=lambda x: x["score"], reverse=True)
+        result = sorted(
+            result,
+            key=lambda x: (
+                x["smart_money"],
+                x["volume_spike"],
+                x["score"]
+            ),
+            reverse=True
+        )
 
         return result
 
