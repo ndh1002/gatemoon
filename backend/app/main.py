@@ -169,7 +169,7 @@ def create_app():
             volume = float(coin.get("volume", 0))
             volume_spike = calculate_volume_spike(
                symbol,
-                volume
+               volume
             )
             change = float(coin.get("change", 0))
             price = float(coin.get("last", 0))
