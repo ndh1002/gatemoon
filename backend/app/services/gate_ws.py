@@ -6,6 +6,7 @@ GATE_WS = "wss://api.gateio.ws/ws/v4/"
 
 tracked = {}
 volume_history = {}
+price_history = {}
 
 async def gate_loop():
 
@@ -56,14 +57,30 @@ async def gate_loop():
                             }
 
                         current_volume = float(result.get("base_volume", 0))
+                        current_price = float(result.get("last", 0))
 
                         if symbol not in volume_history:
                             volume_history[symbol] = []
 
                         volume_history[symbol].append(current_volume)
+                        if symbol not in price_history:
+                            price_history[symbol] = []
+
+                        price_history[symbol].append(current_price)
+
+                        price_history[symbol] = price_history[symbol][-20:]
 
                         # chỉ giữ 20 mẫu gần nhất
                         volume_history[symbol] = volume_history[symbol][-20:]
+
+                        current_price = float(result.get("last", 0))
+
+                        if symbol not in price_history:
+                            price_history[symbol] = []
+
+                        price_history[symbol].append(current_price)
+
+                        price_history[symbol] = price_history[symbol][-50:]
 
                         print("TRACKED:", tracked)
 

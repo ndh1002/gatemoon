@@ -18,6 +18,7 @@ from app.ws.market import router as ws_router
 from fastapi import FastAPI
 import app.services.gate_ws as gate_ws
 from app.ai.moonshot_ai import calculate_score
+from app.services.gate_ws import price_history
 
 BAD_WORDS = [
     "5L",
@@ -120,6 +121,21 @@ def calculate_score(coin, volume_spike=1):
 
     return min(score, 100)
 
+def calculate_breakout(symbol, current_price):
+
+    history = price_history.get(symbol, [])
+
+    if len(history) < 10:
+        return 0
+
+    recent_high = max(history[:-1])
+
+    if recent_high <= 0:
+        return 0
+
+    breakout = (current_price / recent_high) * 100
+
+    return round(breakout, 2)
 
 def create_app():
 
@@ -181,6 +197,7 @@ def create_app():
 
             # AI score
             score = calculate_score(coin, volume_spike)
+            breakout = calculate_breakout(symbol, price)
 
             result.append({
                 "symbol": symbol,
@@ -188,7 +205,8 @@ def create_app():
                 "volume": volume,
                 "change": change,
                 "score": score,
-                "volume_spike": volume_spike
+                "volume_spike": volume_spike,
+                "breakout": breakout
             })
 
         result = sorted(result, key=lambda x: x["score"], reverse=True)
