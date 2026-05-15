@@ -183,18 +183,15 @@ def create_app():
                 continue
 
             # AI score
-            score = calculate_score(
-                coin,
-                volume_spike
-            )
+            score = calculate_score(coin, volume_spike)
 
             result.append({
                 "symbol": symbol,
                 "price": price,
                 "volume": volume,
                 "change": change,
-                "score": score
-                "volume_spike": volume_spike,
+                "score": score,
+                "volume_spike": volume_spike
             })
 
         result = sorted(result, key=lambda x: x["score"], reverse=True)
