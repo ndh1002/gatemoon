@@ -19,12 +19,21 @@ from fastapi import FastAPI
 import app.services.gate_ws as gate_ws
 from app.ai.moonshot_ai import calculate_score
 
+BAD_WORDS = [
+    "5L",
+    "5S",
+    "3L",
+    "3S",
+    "BULL",
+    "BEAR",
+    "DOWN",
+    "UP"
+]
+
 BAD_COINS = [
-    "PEPE",
-    "SHIB",
-    "FLOKI",
-    "DOGE",
-    "BONK"
+    "DOGE5L",
+    "BTC5L",
+    "ETH5S",
 ]
 
 logging.basicConfig(level=logging.INFO)
@@ -64,6 +73,33 @@ async def lifespan(app: FastAPI):
         await redis_client.aclose()
 
 
+def calculate_score(coin):
+
+    score = 0
+
+    volume = float(coin.get("volume", 0))
+    change = float(coin.get("change", 0))
+
+    # volume mạnh
+    if volume > 10_000_000:
+        score += 20
+
+    if volume > 50_000_000:
+        score += 20
+
+    # momentum mạnh
+    if change > 3:
+        score += 20
+
+    if change > 7:
+        score += 20
+
+    if change > 12:
+        score += 20
+
+    return min(score, 100)
+
+
 def create_app():
 
     settings = get_settings()
@@ -94,37 +130,41 @@ def create_app():
 
         for symbol, coin in gate_ws.tracked.items():
 
+            # chỉ lấy USDT pairs
+            if not symbol.endswith("USDT"):
+                continue
+
             base_symbol = symbol.split("_")[0]
 
+            # lọc leverage token
+            if any(x in base_symbol for x in BAD_WORDS):
+                continue
+
+            # blacklist coin rác
             if base_symbol in BAD_COINS:
                 continue
 
+            # parse data
             volume = float(coin.get("volume", 0))
+            change = float(coin.get("change", 0))
+            price = float(coin.get("last", 0))
 
-            score = calculate_score(coin)
-            volume = float(coin.get("volume", 0))
-
-            if volume < 100000:
+            # lọc volume thấp
+            if volume < 5_000_000:
                 continue
 
-            score = 50
+            # lọc coin sideway
+            if abs(change) < 1:
+                continue
 
-            change = float(coin.get("change", 0))
-
-            if volume > 10_000_000:
-                score += 10
-
-            if change > 5:
-                score += 20
-
-            if change > 10:
-                score += 20
+            # AI score
+            score = calculate_score(coin)
 
             result.append({
                 "symbol": symbol,
-                "price": float(coin.get("last", 0)),
-                "volume": float(coin.get("volume", 0)),
-                "change": float(coin.get("change", 0)),
+                "price": price,
+                "volume": volume,
+                "change": change,
                 "score": score
             })
 
