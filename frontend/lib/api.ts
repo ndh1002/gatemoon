@@ -5,10 +5,10 @@ export function getApiBase(): string {
     return (
       process.env.API_INTERNAL_URL ||
       process.env.NEXT_PUBLIC_API_URL ||
-      "http://localhost:8000"
+      "https://gatemoon-backend.onrender.com"
     );
   }
-  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  return process.env.NEXT_PUBLIC_API_URL || "https://gatemoon-backend.onrender.com";
 }
 
 export async function fetchLatest(): Promise<ScanPayload> {
