@@ -167,10 +167,7 @@ def create_app():
 
             # parse data
             volume = float(coin.get("volume", 0))
-            volume_spike = calculate_volume_spike(
-               symbol,
-               volume
-            )
+            volume_spike = calculate_volume_spike(symbol, volume)
             change = float(coin.get("change", 0))
             price = float(coin.get("last", 0))
 
@@ -191,7 +188,7 @@ def create_app():
                 "volume": volume,
                 "change": change,
                 "score": score,
-                "volume_spike": volume_spike,
+                "volume_spike": volume_spike
             })
 
         result = sorted(result, key=lambda x: x["score"], reverse=True)
