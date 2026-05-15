@@ -73,7 +73,24 @@ async def lifespan(app: FastAPI):
         await redis_client.aclose()
 
 
-def calculate_score(coin):
+def calculate_volume_spike(symbol, current_volume):
+
+    history = gate_ws.volume_history.get(symbol, [])
+
+    if len(history) < 5:
+        return 1
+
+    avg_volume = sum(history[:-1]) / max(len(history[:-1]), 1)
+
+    if avg_volume <= 0:
+        return 1
+
+    spike = current_volume / avg_volume
+
+    return round(spike, 2)
+
+
+def calculate_score(coin, volume_spike=1):
 
     score = 0
 
@@ -87,14 +104,18 @@ def calculate_score(coin):
     if volume > 50_000_000:
         score += 20
 
-    # momentum mạnh
+    # momentum
     if change > 3:
         score += 20
 
     if change > 7:
         score += 20
 
-    if change > 12:
+    # volume spike
+    if volume_spike > 2:
+        score += 20
+
+    if volume_spike > 5:
         score += 20
 
     return min(score, 100)
@@ -146,6 +167,10 @@ def create_app():
 
             # parse data
             volume = float(coin.get("volume", 0))
+            volume_spike = calculate_volume_spike(
+               symbol,
+                volume
+            )
             change = float(coin.get("change", 0))
             price = float(coin.get("last", 0))
 
@@ -158,7 +183,10 @@ def create_app():
                 continue
 
             # AI score
-            score = calculate_score(coin)
+            score = calculate_score(
+                coin,
+                volume_spike
+            )
 
             result.append({
                 "symbol": symbol,
@@ -166,6 +194,7 @@ def create_app():
                 "volume": volume,
                 "change": change,
                 "score": score
+                "volume_spike": volume_spike,
             })
 
         result = sorted(result, key=lambda x: x["score"], reverse=True)

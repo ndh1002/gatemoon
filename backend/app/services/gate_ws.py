@@ -5,6 +5,7 @@ import websockets
 GATE_WS = "wss://api.gateio.ws/ws/v4/"
 
 tracked = {}
+volume_history = {}
 
 async def gate_loop():
 
@@ -53,6 +54,16 @@ async def gate_loop():
                                 "volume": result.get("base_volume"),
                                 "change": result.get("change_percentage"),
                             }
+
+                        current_volume = float(result.get("base_volume", 0))
+
+                        if symbol not in volume_history:
+                            volume_history[symbol] = []
+
+                        volume_history[symbol].append(current_volume)
+
+                        # chỉ giữ 20 mẫu gần nhất
+                        volume_history[symbol] = volume_history[symbol][-20:]
 
                             print("TRACKED:", tracked)
 
