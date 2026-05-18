@@ -29,6 +29,23 @@ async def gate_loop():
                 }
 
                 await ws.send(json.dumps(payload))
+                msg = await ws.recv()
+
+                data = json.loads(msg)
+
+                if data.get("event") == "update":
+
+                    result = data.get("result")
+
+                    if isinstance(result, dict):
+
+                        symbol = result.get("currency_pair")
+
+                        tracked[symbol] = {
+                            "last": result.get("last"),
+                            "volume": result.get("base_volume"),
+                            "change": result.get("change_percentage"),
+                        }
 
                 print("SUBSCRIBED")
 
