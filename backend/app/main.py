@@ -70,6 +70,12 @@ async def lifespan(app: FastAPI):
         await scan_task
     except asyncio.CancelledError:
         pass
+
+    try:
+        await gate_task
+    except asyncio.CancelledError:
+        pass
+
     if redis_client is not None:
         await redis_client.aclose()
 
