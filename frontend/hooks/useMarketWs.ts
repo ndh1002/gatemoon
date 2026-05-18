@@ -30,7 +30,7 @@ export function useMarketWs(initial: ScanPayload | null) {
         : "ws";
 
     const ws = new WebSocket(
-      `${protocol}://${window.location.host}/ws`
+      `${protocol}://${window.location.host}/ws/market`
     );
 
     wsRef.current = ws;
