@@ -23,15 +23,15 @@ export function useMarketWs(initial: ScanPayload | null) {
 
   useEffect(() => {
     const url = `${WS.replace(/\/$/, "")}/ws/market`;
-     /*const ws = new WebSocket(url); được thay bởi đoạn mã dưới */
-    const protocol =
+    const ws = new WebSocket(url); /*được thay bởi đoạn mã dưới */
+    /* const protocol =
       window.location.protocol === "https:"
         ? "wss"
         : "ws";
 
     const ws = new WebSocket(
       `${protocol}://${window.location.host}/ws/market`
-    );
+    ); */
 
     wsRef.current = ws;
     setStatus("connecting");
