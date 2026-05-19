@@ -78,27 +78,62 @@ async def lifespan(app: FastAPI):
 
     if redis_client is not None:
         await redis_client.aclose()
+# code cũ
+#def calculate_smart_money(volume_spike, breakout, change):
 
-def calculate_smart_money(volume_spike, breakout, change):
-
-    score = 0
+#    score = 0
 
     # volume đột biến
-    if volume_spike > 2:
-        score += 30
+#    if volume_spike > 2:
+#        score += 30
 
-    if volume_spike > 5:
-        score += 30
+#    if volume_spike > 5:
+#        score += 30
 
     # breakout
-    if breakout > 95:
-        score += 20
+#    if breakout > 1.02:  # cũ 95
+#        score += 25      # cũ 20
 
     # momentum bắt đầu
-    if 2 < change < 12:
-        score += 20
+    #if 2 < change < 12: code cũ
+    #    score += 20     code cũ
+#    if change > 1:
+#        score += 10
 
-    return min(score, 100)
+#    return min(score, 100)
+
+def calculate_moonshot(volume_spike, breakout, change, whale_score, smart_money):
+    score = 0
+
+    # breakout mạnh
+    if breakout > 101:
+        score += 30
+    elif breakout > 100:
+        score += 20
+    elif breakout > 98:
+        score += 10
+
+    # tăng giá ngắn hạn
+    if change > 5:
+        score += 25
+    elif change > 2:
+        score += 15
+    elif change > 0:
+        score += 8
+
+    # smart money
+    score += smart_money * 0.2
+
+    # whale
+    score += whale_score * 0.15
+
+    # volume chỉ phụ
+    if volume_spike > 3:
+        score += 10
+    elif volume_spike > 1.5:
+        score += 5
+
+    return round(min(score, 100), 2)
 
 def calculate_volume_spike(symbol, current_volume):
 
@@ -139,11 +174,11 @@ def calculate_score(coin, volume_spike=1):
         score += 20
 
     # volume spike
-    if volume_spike > 2:
-        score += 20
+    if volume_spike > 3:
+        score += 35
 
-    if volume_spike > 5:
-        score += 20
+    if volume_spike > 8:
+        score += 35
 
     return min(score, 100)
 
@@ -226,21 +261,43 @@ def create_app():
             price = float(coin.get("last", 0))
 
             # lọc volume thấp
-            if volume < 5_000_000:
+            if volume < 300_000:
                 continue
 
             # lọc coin sideway
-            if abs(change) < 1:
+            if abs(change) < 0.3:
                 continue
 
             # AI score
+            # AI score
             score = calculate_score(coin, volume_spike)
+
             breakout = calculate_breakout(symbol, price)
 
-            smart_money = calculate_smart_money(
+            smart_money = 0
+
+            if volume_spike > 2:
+                smart_money += 30
+
+            if volume_spike > 5:
+                smart_money += 30
+
+            if breakout > 101:
+                smart_money += 25
+
+            if change > 1:
+                smart_money += 10
+
+            smart_money = min(smart_money, 100)
+
+            whale_score = 0
+
+            moonshot = calculate_moonshot(
                 volume_spike,
                 breakout,
-                change
+                change,
+                whale_score,
+                smart_money
             )
 
             result.append({
@@ -248,21 +305,33 @@ def create_app():
                 "price": price,
                 "volume": volume,
                 "change": change,
-                "score": score,
+                "score": moonshot,
                 "volume_spike": volume_spike,
                 "breakout": breakout,
+                "whale_score": whale_score,
                 "smart_money": smart_money
             })
 
         result = sorted(
-            result,
+           result,
             key=lambda x: (
                 x["smart_money"],
+                x["breakout"],
                 x["volume_spike"],
-                x["score"]
+                x["change"]
             ),
             reverse=True
         )
+
+        #result = sorted(
+        #    result,
+        #    key=lambda x: (
+        #        x["smart_money"],
+        #        x["volume_spike"],
+        #        x["score"]
+        #    ),
+        #    reverse=True
+        #)
 
         return result
 

@@ -109,7 +109,24 @@ async def run_scanner(hub: MarketHub, redis_client: redis.Redis | None) -> None:
             for market, t in tickers.items():
                 if not market.endswith("/USDT"):
                     continue
+
+                base = market.split("/")[0]
+
+                BAD_WORDS = [
+                    "3L", "3S",
+                    "5L", "5S",
+                    "BULL", "BEAR",
+                    "UP", "DOWN"
+                ]
+
+                if any(x in base for x in BAD_WORDS):
+                    continue
+
                 qv = _parse_quote_volume(t)
+
+                if qv < 300_000:
+                    continue
+
                 if qv < settings.min_quote_volume_usdt:
                     continue
                 candidates.append((market, t, qv))
@@ -125,14 +142,14 @@ async def run_scanner(hub: MarketHub, redis_client: redis.Redis | None) -> None:
                     else:
                         histories[market] = _load_quote_volume_history(db, sym.id)
 
-            sem = asyncio.Semaphore(12)
+            sem = asyncio.Semaphore(4) # trước sửa là 12 
 
             async def one(market: str, ticker: dict[str, Any]) -> dict[str, Any] | None:
                 async with sem:
                     try:
                         ohlcv, trades = await asyncio.gather(
-                            client.fetch_ohlcv(market, timeframe="1h", limit=48),
-                            client.fetch_trades(market, limit=120),
+                            client.fetch_ohlcv(market, timeframe="1h", limit=12), #trước đó là 48
+                            client.fetch_trades(market, limit=40),                #trước đó là 120
                         )
                     except Exception as exc:
                         logger.warning("fetch detail failed %s: %s", market, exc)
